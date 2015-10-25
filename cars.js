@@ -19,9 +19,10 @@ $(document).ready(function() {
     var downKey = 40;
 
     var machine = $("svg #machine");
-    var body = $(machine).children();
+    var body = $(machine).children().not(".sensor, #sensorMask");
     var bodyRect = document.getElementById("body");
     var boundariesElements = document.getElementsByClassName("boundary");
+    var sensorElements = document.getElementsByClassName("sensor");
 
     var boundaries = [];
     [].forEach.call(boundariesElements, function(el) {
@@ -124,7 +125,29 @@ $(document).ready(function() {
         return collision;
     }
 
+    function detectSensors() {
+        // todo: scope doesn't fit - make it work
+        [].forEach.call(sensorElements, function(sensorEl) {
+            var sensorCollide = false;
+            boundaries.forEach(function(el) {
+                if (svg.checkIntersection(sensorEl, el)) {
+                    $(sensorEl).velocity({
+                        stroke: "#ff0000"
+                    });
+                    sensorCollide = true;
+                }
+            });
+            if (!sensorCollide) {
+                $(sensorEl).velocity({
+                    stroke: "#dddddd"
+                });
+            }
+        });
+    }
+
     function tick() {
+        detectSensors();
+
         if (!detectCollision()) {
             if (thrust) {
                 if (forceX < 1) {

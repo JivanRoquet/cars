@@ -11,6 +11,16 @@
 
 <svg id="main" height="600" width="1200">
 
+    <g id="machine">
+        <line id="centerSensor1" class="sensor centerSensor" x1="0" y1="0" x2="185" y2="0" stroke="#dddddd"/>
+        <line id="rightSensor1" class="sensor rightSensor" x1="0" y1="0" x2="145" y2="60" stroke="#dddddd"/>
+        <line id="leftSensor1" class="sensor leftSensor" x1="0" y1="0" x2="145" y2="-60" stroke="#dddddd"/>
+        <circle id="sensorMask" cx="0" cy="0" r="40" fill="white"/>
+        <rect id="body" fill="black" x="-10" y="-5" width="20" height="10"/>
+        <circle id="eyeL" cx="6" cy="-4" r="2"/>
+        <circle id="eyeR" cx="6" cy="4" r="2"/>
+    </g>
+
     <g id="boundaries">
         <rect class="boundary" x="0" y="0" width="1200" height="3" fill="grey"/>
         <rect class="boundary" x="0" y="0" width="3" height="600" fill="grey"/>
@@ -18,12 +28,7 @@
         <rect class="boundary" x="1197" y="0" width="3" height="600" fill="grey"/>
         <rect class="boundary obstacle" x="500" y="0" width="5" height="120" fill="grey"/>
         <rect class="boundary obstacle" x="500" y="500" width="5" height="120" fill="grey"/>
-    </g>
-
-    <g id="machine">
-        <rect id="body" fill="black" x="-10" y="-5" width="20" height="10"/>
-        <circle id="eyeL" cx="6" cy="-4" r="2"/>
-        <circle id="eyeR" cx="6" cy="4" r="2"/>
+        <rect class="boundary obstacle" x="900" y="240" width="5" height="120" fill="grey"/>
     </g>
 
 </svg>
