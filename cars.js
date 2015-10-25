@@ -1,5 +1,20 @@
 $(document).ready(function() {
+    var mode;
+    mode = "manual";
+
+    $("button[name=auto]").on("click", function() {
+        mode = "auto";
+        console.log(mode);
+    });
+
+    $("button[name=manual]").on("click", function() {
+        mode = "manual";
+        console.log(mode);
+    });
+
     svg = document.getElementById("main");
+
+    var maxForce = 0.5
 
     var score = 0;
 
@@ -50,30 +65,47 @@ $(document).ready(function() {
     resetMachine();
 
     window.onkeydown = function(e) {
-        var key = e.keyCode ? e.keyCode : e.which;
-        if (key == upKey) {
-            thrust = true;
-        } else if (key == downKey) {
-            brake = true;
-        } else if (key == leftKey) {
-            turnLeft = true;
-        } else if (key == rightKey) {
-            turnRight = true;
+        if (mode == "manual") {
+            var key = e.keyCode ? e.keyCode : e.which;
+            if (key == upKey) {
+                thrust = true;
+            } else if (key == downKey) {
+                brake = true;
+            } else if (key == leftKey) {
+                turnLeft = true;
+            } else if (key == rightKey) {
+                turnRight = true;
+            }
         }
     }
 
     window.onkeyup = function(e) {
-        var key = e.keyCode ? e.keyCode : e.which;
-        if (key == upKey) {
-            thrust = false;
-        } else if (key == downKey) {
-            brake = false;
-        } else if (key == leftKey) {
-            turnLeft = false;
-        } else if (key == rightKey) {
-            turnRight = false;
+        if (mode == "manual") {
+            var key = e.keyCode ? e.keyCode : e.which;
+            if (key == upKey) {
+                thrust = false;
+            } else if (key == downKey) {
+                brake = false;
+            } else if (key == leftKey) {
+                turnLeft = false;
+            } else if (key == rightKey) {
+                turnRight = false;
+            }
         }
     }
+
+    window.setInterval(function() {
+        if (mode == "auto") {
+            console.log(Math.random()<.5);
+            thrust = Math.random()<.8;
+            if (!thrust) { brake = Math.random()<.2; }
+            else { brake = false; }
+            turnLeft = Math.random()<.5;
+            turn = Math.random()<.5;
+            if (!turn) { turnLeft = false; turnRight = false; }
+            else if (turn && !turnLeft) { turnRight = true; }
+        }
+    }, 200);
 
     function move(machine, tranX, tranY, direction) {
         machine.velocity({
@@ -136,11 +168,11 @@ $(document).ready(function() {
             if (sensorCollision) {
                 console.log("erk");
                 $(sensorEl).velocity({
-                    fill: "#f30000"
+                    fill: "#ffcccc"
                 }, 10);
             } else {
                 $(sensorEl).velocity({
-                    fill: "#eeeeee"
+                    fill: "#f9f9f9"
                 }, 10);
             }
         });
@@ -151,10 +183,10 @@ $(document).ready(function() {
 
         if (!detectCollision()) {
             if (thrust) {
-                if (forceX < 1) {
-                    forceX += 1/20;
+                if (forceX < maxForce) {
+                    forceX += 1/30;
                 } else {
-                    forceX = 1;
+                    forceX = maxForce;
                 }
             } else {
                 forceX = 0;
