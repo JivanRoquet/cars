@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
+<script src="cars.js"></script>
+</head>
+
+<body>
+
+<svg id="main" height="600" width="1200">
+
+    <g id="boundaries">
+        <rect class="boundary" x="0" y="0" width="1200" height="3" fill="grey"/>
+        <rect class="boundary" x="0" y="0" width="3" height="600" fill="grey"/>
+        <rect class="boundary" x="0" y="597" width="1200" height="3" fill="grey"/>
+        <rect class="boundary" x="1197" y="0" width="3" height="600" fill="grey"/>
+        <rect class="boundary obstacle" x="500" y="0" width="5" height="120" fill="grey"/>
+        <rect class="boundary obstacle" x="500" y="500" width="5" height="120" fill="grey"/>
+    </g>
+
+    <g id="machine">
+        <rect id="body" fill="black" x="-10" y="-5" width="20" height="10"/>
+        <circle id="eyeL" cx="6" cy="-4" r="2"/>
+        <circle id="eyeR" cx="6" cy="4" r="2"/>
+    </g>
+
+</svg>
+
+<div>Speed: <span id="speed">0</span></div>
+<div>Heading: <span id="heading">0</span></div>
+<div id="brake_indicator" style="height: 20px; display: inline-block; background: grey;"></div>
+<div id="thrust_indicator" style="height: 20px; display: inline-block; background: red;"></div>
+</body>
+
+</html>
