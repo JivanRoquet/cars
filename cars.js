@@ -1,6 +1,8 @@
 $(document).ready(function() {
     svg = document.getElementById("main");
 
+    var score = 0;
+
     var forceX = 0;
     var brakeX = 0;
     var speedX = 0;
@@ -99,12 +101,14 @@ $(document).ready(function() {
         }, 10);
     }
 
-    function updateDashboard(speedX, heading, brakeX, forceX) {
+    function updateDashboard(speedX, heading, score) {
         $("#speed").html(Math.round(speedX * 10) / 10);
         $("#heading").html(heading);
+        $("#score").html(Math.round(score * 10) / 10);
     }
 
     function collisionHappened() {
+        score -= 10;
         resetMachine();
     }
 
@@ -156,14 +160,18 @@ $(document).ready(function() {
 
             if (speedX > 0) {
                 speedX -= brakeX / 10 + resistance / 30;
+            } else if (speedX < 0) {
+                speedX = 0;
             }
+
+            score += speedX / 100;
 
             tranX = speedX * Math.cos(heading / 180 * Math.PI);
             tranY = speedX * Math.sin(heading / 180 * Math.PI);
 
             move(machine, tranX, tranY, heading);
 
-            updateDashboard(speedX, heading, brakeX, forceX);
+            updateDashboard(speedX, heading, score);
             setColor(thrust, brake);
         }
 
