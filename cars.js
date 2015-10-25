@@ -126,21 +126,22 @@ $(document).ready(function() {
     }
 
     function detectSensors() {
-        // todo: scope doesn't fit - make it work
         [].forEach.call(sensorElements, function(sensorEl) {
-            var sensorCollide = false;
-            boundaries.forEach(function(el) {
+            var sensorCollision = false;
+            sensorCollision = boundaries.some(function(el) {
                 if (svg.checkIntersection(sensorEl, el)) {
-                    $(sensorEl).velocity({
-                        stroke: "#ff0000"
-                    });
-                    sensorCollide = true;
+                    return true;
                 }
             });
-            if (!sensorCollide) {
+            if (sensorCollision) {
+                console.log("erk");
                 $(sensorEl).velocity({
-                    stroke: "#dddddd"
-                });
+                    fill: "#f30000"
+                }, 10);
+            } else {
+                $(sensorEl).velocity({
+                    fill: "#eeeeee"
+                }, 10);
             }
         });
     }
