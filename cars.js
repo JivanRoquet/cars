@@ -204,18 +204,18 @@ $(document).ready(function() {
             }
 
             if (turnLeft && speedX > 0) {
-                heading -= 1 * Math.pow(speedX, 0.5);
+                heading -= 1 * Math.pow(speedX, 0.4);
             }
             if (turnRight && speedX > 0) {
-                heading += 1 * Math.pow(speedX, 0.5);
+                heading += 1 * Math.pow(speedX, 0.4);
             }
 
             speedX += forceX / 10;
 
-            resistance = 1/2 + speedX * speedX / 10;
+            resistance = 1/4 + speedX * speedX / 8;
 
             if (speedX > 0) {
-                speedX -= brakeX / 10 + resistance / 30;
+                speedX -= brakeX / 30 + resistance / 30;
             } else if (speedX < 0) {
                 speedX = 0;
             }
