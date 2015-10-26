@@ -4,29 +4,58 @@ $(document).ready(function() {
 
     $("button[name=auto]").on("click", function() {
         mode = "auto";
-        console.log(mode);
     });
 
     $("button[name=manual]").on("click", function() {
         mode = "manual";
-        console.log(mode);
     });
 
     svg = document.getElementById("main");
 
-    var maxForce = 0.5
+    var maxForce = 2
 
     var score = 0;
+    var distance = 0;
+    var time = 0;
 
-    var forceX = 0;
+    var force = 0;
     var brakeX = 0;
-    var speedX = 0;
+    var speed = 0;
     var thrust = false;
     var brake = false;
     var resistance = 0;
     var heading = 0;
     var turnLeft = false;
     var turnRight = false;
+
+    var sensorsObject = {
+        centerSensor1: false,
+        centerSensor2: false,
+        centerSensor3: false,
+        leftSensor1: false,
+        leftSensor2: false,
+        leftSensor3: false,
+        rightSensor1: false,
+        rightSensor2: false,
+        rightSensor3: false
+    };
+
+    window.setInterval(function() {
+        // summarizes all data to be sent to NN
+        // and sends it - then wait for the response
+        neuralNetworkInput = [
+            sensorsObject.centerSensor1,
+            sensorsObject.centerSensor2,
+            sensorsObject.centerSensor3,
+            sensorsObject.rightSensor1,
+            sensorsObject.rightSensor2,
+            sensorsObject.rightSensor3,
+            sensorsObject.leftSensor1,
+            sensorsObject.leftSensor2,
+            sensorsObject.leftSensor3,
+            speed
+        ]
+    }, 50);
 
     var rightKey = 39;
     var leftKey = 37;
@@ -51,8 +80,10 @@ $(document).ready(function() {
 
     function resetMachine() {
         // resets machine's speed and heading
-        speedX = 0;
+        speed = 0;
         heading = 0;
+        distance = 0;
+        time = 0;
 
         // places the machine in the center of the viewPort
         machine.velocity({
@@ -95,8 +126,13 @@ $(document).ready(function() {
     }
 
     window.setInterval(function() {
+        // calculate elapsed time
+        // indepedently from display frame rate
+        time += 1;
+    }, 50);
+
+    window.setInterval(function() {
         if (mode == "auto") {
-            console.log(Math.random()<.5);
             thrust = Math.random()<.8;
             if (!thrust) { brake = Math.random()<.2; }
             else { brake = false; }
@@ -134,14 +170,15 @@ $(document).ready(function() {
         }, 10);
     }
 
-    function updateDashboard(speedX, heading, score) {
-        $("#speed").html(Math.round(speedX * 10) / 10);
+    function updateDashboard(speed, heading, score) {
+        $("#speed").html(Math.round(speed * 10) / 10);
         $("#heading").html(heading);
         $("#score").html(Math.round(score * 10) / 10);
     }
 
-    function collisionHappened() {
+    function collisionHappened(time, distance) {
         score -= 10;
+        score += distance / time; // bonus for avg speed
         resetMachine();
     }
 
@@ -150,7 +187,7 @@ $(document).ready(function() {
 
         boundaries.forEach(function(el) {
             if (svg.checkIntersection(bodyRect, el)) {
-                collisionHappened();
+                collisionHappened(time, distance);
                 collision = true;
             }
         });
@@ -166,11 +203,12 @@ $(document).ready(function() {
                 }
             });
             if (sensorCollision) {
-                console.log("erk");
+                sensorsObject[$(sensorEl).attr("id")] = true;
                 $(sensorEl).velocity({
-                    fill: "#ffcccc"
+                    fill: "#dddddd"
                 }, 10);
             } else {
+                sensorsObject[$(sensorEl).attr("id")] = false;
                 $(sensorEl).velocity({
                     fill: "#f9f9f9"
                 }, 10);
@@ -183,51 +221,52 @@ $(document).ready(function() {
 
         if (!detectCollision()) {
             if (thrust) {
-                if (forceX < maxForce) {
-                    forceX += 1/30;
+                if (force < maxForce) {
+                    force += 1/30;
                 } else {
-                    forceX = maxForce;
+                    force = maxForce;
                 }
             } else {
-                forceX = 0;
+                force = 0;
             }
 
             if (brake) {
-                if (speedX > 0) {
+                if (speed > 0) {
                     brakeX = 1;
                 } else {
-                    speedX = 0;
+                    speed = 0;
                     brakeX = 0;
                 }
             } else {
                 brakeX = 0;
             }
 
-            if (turnLeft && speedX > 0) {
-                heading -= 1 * Math.pow(speedX, 0.4);
+            if (turnLeft && speed > 0) {
+                heading -= 0.5 * Math.pow(speed, 0.6);
             }
-            if (turnRight && speedX > 0) {
-                heading += 1 * Math.pow(speedX, 0.4);
-            }
-
-            speedX += forceX / 10;
-
-            resistance = 1/4 + speedX * speedX / 8;
-
-            if (speedX > 0) {
-                speedX -= brakeX / 30 + resistance / 30;
-            } else if (speedX < 0) {
-                speedX = 0;
+            if (turnRight && speed > 0) {
+                heading += 0.5 * Math.pow(speed, 0.6);
             }
 
-            score += speedX / 100;
+            speed += force / 10;
+            distance += speed;
 
-            tranX = speedX * Math.cos(heading / 180 * Math.PI);
-            tranY = speedX * Math.sin(heading / 180 * Math.PI);
+            resistance = 1/5 + speed * speed / 10;
+
+            if (speed > 0) {
+                speed -= brakeX / 30 + resistance / 30;
+            } else if (speed < 0) {
+                speed = 0;
+            }
+
+            score += speed / 100;
+
+            tranX = speed * Math.cos(heading / 180 * Math.PI);
+            tranY = speed * Math.sin(heading / 180 * Math.PI);
 
             move(machine, tranX, tranY, heading);
 
-            updateDashboard(speedX, heading, score);
+            updateDashboard(speed, heading, score);
             setColor(thrust, brake);
         }
 

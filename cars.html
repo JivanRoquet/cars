@@ -5,6 +5,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
 <script src="cars.js"></script>
+<style>
+svg rect.sensor {
+    opacity: 0;
+}
+</style>
 </head>
 
 <body>
@@ -32,8 +37,11 @@
         -->
 
         <rect id="body" fill="black" x="-10" y="-5" width="20" height="10"/>
-        <circle id="eyeL" cx="6" cy="-4" r="2"/>
-        <circle id="eyeR" cx="6" cy="4" r="2"/>
+        <rect id="front" fill="black" x="10" y="-4" width="1" height="8"/>
+        <rect id="FL" x="4" y="-6" width="4" height="1"/>
+        <rect id="FR" x="4" y="5" width="4" height="1"/>
+        <rect id="RL" x="-8" y="-6" width="4" height="1"/>
+        <rect id="RR" x="-8" y="5" width="4" height="1"/>
     </g>
 
     <g id="boundaries">
