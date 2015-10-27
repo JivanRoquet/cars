@@ -205,6 +205,12 @@ $(document).ready(function() {
     }
 
     function getSensorIntersectionValue(sensorEl, el) {
+        // gets sensor coordinates relative to the car
+        sensorPoint1 = [$(sensorEl).attr("x1"), $(sensorEl).attr("y1")];
+        sensorPoint2 = [$(sensorEl).attr("x2"), $(sensorEl).attr("y2")];
+
+        console.log(sensorPoint1, sensorPoint2);
+        throw new Error("");
         return 0;
     }
 
