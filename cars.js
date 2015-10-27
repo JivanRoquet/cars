@@ -18,6 +18,11 @@ $(document).ready(function() {
     var distance = 0;
     var time = 0;
 
+    var originX = 600;
+    var originY = 300;
+    window.posX = 0;
+    window.posY = 0;
+
     var force = 0;
     var brakeX = 0;
     var speed = 0;
@@ -84,12 +89,14 @@ $(document).ready(function() {
         heading = 0;
         distance = 0;
         time = 0;
+        posX = originX;
+        posY = originY;
 
         // places the machine in the center of the viewPort
         machine.velocity({
             translateZ: 0,
-            translateX: "600px",
-            translateY: "300px",
+            translateX: posX + "px",
+            translateY: posY + "px",
         }, 0);
     }
 
@@ -144,6 +151,9 @@ $(document).ready(function() {
     }, 200);
 
     function move(machine, tranX, tranY, direction) {
+        posX += tranX;
+        posY += tranY;
+
         machine.velocity({
             translateZ: 0, // adds a 3d move to enable Hardware Acceleration by default
             translateX: "+=" + tranX + "px",
@@ -194,25 +204,17 @@ $(document).ready(function() {
         return collision;
     }
 
+    function getSensorIntersectionValue(sensorEl, el) {
+        return 0;
+    }
+
     function detectSensors() {
         [].forEach.call(sensorElements, function(sensorEl) {
-            var sensorCollision = false;
-            sensorCollision = boundaries.some(function(el) {
-                if (svg.checkIntersection(sensorEl, el)) {
-                    return true;
-                }
+            var sensorIntersectionValues = [];
+            boundaries.forEach(function(el) {
+                sensorIntersectionValues.push(getSensorIntersectionValue(sensorEl, el));
             });
-            if (sensorCollision) {
-                sensorsObject[$(sensorEl).attr("id")] = true;
-                $(sensorEl).velocity({
-                    fill: "#dddddd"
-                }, 10);
-            } else {
-                sensorsObject[$(sensorEl).attr("id")] = false;
-                $(sensorEl).velocity({
-                    fill: "#f9f9f9"
-                }, 10);
-            }
+            sensorsObject[$(sensorEl).attr("id")] = Math.max(...sensorIntersectionValues);
         });
     }
 
