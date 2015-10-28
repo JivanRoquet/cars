@@ -50,6 +50,8 @@ $(document).ready(function() {
     });
 
     window.setInterval(function() {
+        updateDashboard();
+
         // summarizes all data to be sent to NN
         // and sends it - then wait for the response
         var neuralNetworkInput = [
@@ -173,12 +175,18 @@ $(document).ready(function() {
         }, 10);
     }
 
-    function updateDashboard(speed, heading, score) {
+    function updateDashboard() {
         $("#speed").html(Math.round(speed * 10) / 10);
         $("#heading").html(heading);
         $("#score").html(Math.round(score * 10) / 10);
         $("#posX").html(Math.round(posX * 10) / 10);
         $("#posY").html(Math.round(posY * 10) / 10);
+        $("#left2").html(Math.round(sensorsObject["leftSensor2"] * 100) / 100);
+        $("#left1").html(Math.round(sensorsObject["leftSensor1"] * 100) / 100);
+        $("#center1").html(Math.round(sensorsObject["centerSensor1"] * 100) / 100);
+        $("#center2").html(Math.round(sensorsObject["centerSensor2"] * 100) / 100);
+        $("#right1").html(Math.round(sensorsObject["rightSensor2"] * 100) / 100);
+        $("#right2").html(Math.round(sensorsObject["rightSensor1"] * 100) / 100);
     }
 
     function collisionHappened(time, distance) {
@@ -226,13 +234,24 @@ $(document).ready(function() {
             var rangeX = [el.x, el.x + el.width];
             var rangeY = [el.y, el.y + el.height];
 
-            // todo: evaluate if equation falls into boundary's limits
-            for (var i=posX; i<=sensorPoint2VPX; i+=0.1) {
+            // the following depends on whether x<posX or x>posX
+            var delta = (sensorPoint2VPX > posX) ? 0.1 : -0.1;
+            function checkXRange(i, sensorPoint2VPX) {
+                if (delta > 0) {
+                    return i <= sensorPoint2VPX;
+                } else {
+                    return i >= sensorPoint2VPX;
+                }
+            }
+
+            // actual intersection checking
+            for (var i=posX; checkXRange(i, sensorPoint2VPX); i+=delta) {
                 var j = sensorEquationA * i + sensorEquationB;
                 if (i <= rangeX[1] && i >= rangeX[0] && j <= rangeY[1] && j >= rangeY[0]) {
-                    sensorIntersectionValue = 1 - (i - posX) / Math.abs((sensorPoint2VPX - posX));
+                    sensorIntersectionValue = 1 - Math.abs(i - posX) / Math.abs((sensorPoint2VPX - posX));
+                    break;
                 }
-            };
+            }
         }
         return sensorIntersectionValue;
     }
@@ -297,7 +316,6 @@ $(document).ready(function() {
 
             move(machine, tranX, tranY, heading);
 
-            updateDashboard(speed, heading, score);
             setColor(thrust, brake);
         }
 

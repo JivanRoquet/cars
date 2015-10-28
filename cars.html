@@ -49,13 +49,25 @@ body {
 
 </svg>
 
-<div>Speed: <span id="speed">0</span></div>
-<div>Heading: <span id="heading">0</span></div>
-<div>Score: <span id="score">0</span></div>
-<div>X: <span id="posX">0</span></div>
-<div>Y: <span id="posY">0</span></div>
+<div style="width:100%; clear:both;">
+    <div style="float:left; width:50%;">
+        <div>Speed: <span id="speed">0</span></div>
+        <div>Heading: <span id="heading">0</span></div>
+        <div>Score: <span id="score">0</span></div>
+        <div>X: <span id="posX">0</span></div>
+        <div>Y: <span id="posY">0</span></div>
+    </div>
+    <div style="float:right; width:50%;";>
+        <div>leftSensor2: <span id="left2">0</span></div>
+        <div>leftSensor1: <span id="left1">0</span></div>
+        <div>centerSensor1: <span id="center1">0</span></div>
+        <div>centerSensor2: <span id="center2">0</span></div>
+        <div>rightSensor1: <span id="right1">0</span></div>
+        <div>rightSensor2: <span id="right2">0</span></div>
+    </div>
+</div>
 
-<div>Control: <button name="auto">Auto</button> <button name="manual">Manual</button></div>
+<div style="clear:both;">Control: <button name="auto">Auto</button> <button name="manual">Manual</button></div>
 
 </body>
 
