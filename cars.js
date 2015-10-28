@@ -184,6 +184,8 @@ $(document).ready(function() {
         $("#speed").html(Math.round(speed * 10) / 10);
         $("#heading").html(heading);
         $("#score").html(Math.round(score * 10) / 10);
+        $("#posX").html(Math.round(posX * 10) / 10);
+        $("#posY").html(Math.round(posY * 10) / 10);
     }
 
     function collisionHappened(time, distance) {
@@ -205,19 +207,33 @@ $(document).ready(function() {
     }
 
     function getSensorIntersectionValue(sensorEl, el) {
-        // gets sensor coordinates relative to the machine
-        var sensorPoint2 = [sensorEl.getAttribute("x2"), sensorEl.getAttribute("y2")];
-        var sensorAngle = Math.atan(sensorPoint2[1] / sensorPoint2[0]);
-        var sensorLength = Math.sqrt(Math.pow(sensorPoint2[0], 2) + Math.pow(sensorPoint2[1], 2));
+        // first checks if boundary'drawing box is in sensor's drawing box
+        // if so, determines if the boundary's drawing box fits the equation for the sensor
+        //     if so, computes the nearest intersection point relative to the machine's center
+        //     and retrieves the distance between machine's center and intersection point
 
-        // gets sensor coordinates relative to the viewport
-        var sensorAngleVP = sensorAngle + heading;
-        var sensorPoint2VPX = sensorLength * Math.cos(sensorAngleVP) + posX;
-        var sensorPoint2VPY = sensorLength * Math.sin(sensorAngleVP) + posY;
+        if (svg.checkIntersection(sensorEl, el)) {
+            // gets sensor coordinates relative to the machine
+            var sensorPoint2 = [sensorEl.getAttribute("x2"), sensorEl.getAttribute("y2")];
+            var sensorAngle = Math.atan(sensorPoint2[1] / sensorPoint2[0]);
+            var sensorLength = Math.sqrt(Math.pow(sensorPoint2[0], 2) + Math.pow(sensorPoint2[1], 2));
 
-        // first checks if boundary element is in sensor's drawing box
-        // if so, determines if it fits the equation for the sensor
-        // if so, retrieve the distance between machine's center and intersection point
+            // gets sensor coordinates relative to the viewport
+            var sensorAngleVP = (sensorAngle + heading) / 180 * Math.PI;
+            var sensorPoint2VPX = sensorLength * Math.cos(sensorAngleVP) + posX;
+            var sensorPoint2VPY = sensorLength * Math.sin(sensorAngleVP) + posY;
+
+            // sensor equation: y = Ax + B
+            var sensorEquationA = (sensorPoint2VPY - posY) / (sensorPoint2VPX - posX)
+            var sensorEquationB = sensorPoint2VPY - sensorEquationA * sensorPoint2VPX;
+
+            // X and Y limits for the currently evaluated boundary
+            var rangeX = [el.x, el.x + el.width];
+            var rangeY = [el.y, el.y + el.height];
+
+            // todo: evaluate if equation falls into boundary's limits
+            throw new Error("");
+        }
         return 0;
     }
 
