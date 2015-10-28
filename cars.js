@@ -235,6 +235,7 @@ $(document).ready(function() {
             for (var i=posX; i<=sensorPoint2VPX; i+=0.1) {
                 var j = sensorEquationA * i + sensorEquationB;
                 if (i <= rangeX[1] && i >= rangeX[0] && j <= rangeY[1] && j >= rangeY[0]) {
+                    console.log(sensorEl.getAttribute("id"));
                     console.log("sensor contact");
                     throw new Error("");
                 }
