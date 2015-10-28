@@ -52,7 +52,7 @@ $(document).ready(function() {
     window.setInterval(function() {
         // summarizes all data to be sent to NN
         // and sends it - then wait for the response
-        neuralNetworkInput = [
+        var neuralNetworkInput = [
             sensorsObject.centerSensor1,
             sensorsObject.centerSensor2,
             sensorsObject.rightSensor1,
@@ -61,6 +61,9 @@ $(document).ready(function() {
             sensorsObject.leftSensor2,
             speed
         ]
+
+        // todo: send to neural network
+
     }, 50);
 
     var boundaries = [];
