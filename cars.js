@@ -232,7 +232,13 @@ $(document).ready(function() {
             var rangeY = [el.y, el.y + el.height];
 
             // todo: evaluate if equation falls into boundary's limits
-            throw new Error("");
+            for (var i=posX; i<=sensorPoint2VPX; i+=0.1) {
+                var j = sensorEquationA * i + sensorEquationB;
+                if (i <= rangeX[1] && i >= rangeX[0] && j <= rangeY[1] && j >= rangeY[0]) {
+                    console.log("sensor contact");
+                    throw new Error("");
+                }
+            };
         }
         return 0;
     }
