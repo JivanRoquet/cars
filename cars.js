@@ -26,7 +26,7 @@ $(document).ready(function() {
     var force = 0;
     var brakeX = 0;
     var speed = 0;
-    var thrust = false;
+    var thrust = 0;
     var brake = false;
     var resistance = 0;
     var heading = 0;
@@ -101,7 +101,7 @@ $(document).ready(function() {
         if (mode == "manual") {
             var key = e.keyCode ? e.keyCode : e.which;
             if (key == upKey) {
-                thrust = true;
+                thrust = 1;
             } else if (key == downKey) {
                 brake = true;
             } else if (key == leftKey) {
@@ -116,7 +116,7 @@ $(document).ready(function() {
         if (mode == "manual") {
             var key = e.keyCode ? e.keyCode : e.which;
             if (key == upKey) {
-                thrust = false;
+                thrust = 0;
             } else if (key == downKey) {
                 brake = false;
             } else if (key == leftKey) {
@@ -135,8 +135,8 @@ $(document).ready(function() {
 
     window.setInterval(function() {
         if (mode == "auto") {
-            thrust = Math.random()<.8;
-            if (!thrust) { brake = Math.random()<.2; }
+            thrust = Math.random();
+            if (thrust < 0.3) { brake = Math.random()<.2; }
             else { brake = false; }
             turnLeft = Math.random()<.5;
             turn = Math.random()<.5;
@@ -270,16 +270,6 @@ $(document).ready(function() {
         detectSensors();
 
         if (!detectCollision()) {
-            if (thrust) {
-                if (force < maxForce) {
-                    force += 1/30;
-                } else {
-                    force = maxForce;
-                }
-            } else {
-                force = 0;
-            }
-
             if (brake) {
                 if (speed > 0) {
                     brakeX = 1;
@@ -298,7 +288,7 @@ $(document).ready(function() {
                 heading += 0.5 * Math.pow(speed, 0.6);
             }
 
-            speed += force / 10;
+            speed += thrust / 10;
             distance += speed;
 
             resistance = 1/5 + speed * speed / 10;
