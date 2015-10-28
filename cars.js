@@ -205,12 +205,19 @@ $(document).ready(function() {
     }
 
     function getSensorIntersectionValue(sensorEl, el) {
-        // gets sensor coordinates relative to the car
-        sensorPoint1 = [$(sensorEl).attr("x1"), $(sensorEl).attr("y1")];
-        sensorPoint2 = [$(sensorEl).attr("x2"), $(sensorEl).attr("y2")];
+        // gets sensor coordinates relative to the machine
+        var sensorPoint2 = [sensorEl.getAttribute("x2"), sensorEl.getAttribute("y2")];
+        var sensorAngle = Math.atan(sensorPoint2[1] / sensorPoint2[0]);
+        var sensorLength = Math.sqrt(Math.pow(sensorPoint2[0], 2) + Math.pow(sensorPoint2[1], 2));
 
-        console.log(sensorPoint1, sensorPoint2);
-        throw new Error("");
+        // gets sensor coordinates relative to the viewport
+        var sensorAngleVP = sensorAngle + heading;
+        var sensorPoint2VPX = sensorLength * Math.cos(sensorAngleVP) + posX;
+        var sensorPoint2VPY = sensorLength * Math.sin(sensorAngleVP) + posY;
+
+        // first checks if boundary element is in sensor's drawing box
+        // if so, determines if it fits the equation for the sensor
+        // if so, retrieve the distance between machine's center and intersection point
         return 0;
     }
 
