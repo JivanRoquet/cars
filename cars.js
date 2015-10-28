@@ -185,8 +185,8 @@ $(document).ready(function() {
         $("#left1").html(Math.round(sensorsObject["leftSensor1"] * 100) / 100);
         $("#center1").html(Math.round(sensorsObject["centerSensor1"] * 100) / 100);
         $("#center2").html(Math.round(sensorsObject["centerSensor2"] * 100) / 100);
-        $("#right1").html(Math.round(sensorsObject["rightSensor2"] * 100) / 100);
-        $("#right2").html(Math.round(sensorsObject["rightSensor1"] * 100) / 100);
+        $("#right1").html(Math.round(sensorsObject["rightSensor1"] * 100) / 100);
+        $("#right2").html(Math.round(sensorsObject["rightSensor2"] * 100) / 100);
     }
 
     function collisionHappened(time, distance) {
