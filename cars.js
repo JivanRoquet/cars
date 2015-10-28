@@ -33,35 +33,6 @@ $(document).ready(function() {
     var turnLeft = false;
     var turnRight = false;
 
-    var sensorsObject = {
-        centerSensor1: false,
-        centerSensor2: false,
-        centerSensor3: false,
-        leftSensor1: false,
-        leftSensor2: false,
-        leftSensor3: false,
-        rightSensor1: false,
-        rightSensor2: false,
-        rightSensor3: false
-    };
-
-    window.setInterval(function() {
-        // summarizes all data to be sent to NN
-        // and sends it - then wait for the response
-        neuralNetworkInput = [
-            sensorsObject.centerSensor1,
-            sensorsObject.centerSensor2,
-            sensorsObject.centerSensor3,
-            sensorsObject.rightSensor1,
-            sensorsObject.rightSensor2,
-            sensorsObject.rightSensor3,
-            sensorsObject.leftSensor1,
-            sensorsObject.leftSensor2,
-            sensorsObject.leftSensor3,
-            speed
-        ]
-    }, 50);
-
     var rightKey = 39;
     var leftKey = 37;
     var upKey = 38;
@@ -72,6 +43,25 @@ $(document).ready(function() {
     var bodyRect = document.getElementById("body");
     var boundariesElements = document.getElementsByClassName("boundary");
     var sensorElements = document.getElementsByClassName("sensor");
+
+    var sensorsObject = {};
+    [].forEach.call(sensorElements, function(el) {
+        sensorsObject[el.getAttribute("id")] = 0;
+    });
+
+    window.setInterval(function() {
+        // summarizes all data to be sent to NN
+        // and sends it - then wait for the response
+        neuralNetworkInput = [
+            sensorsObject.centerSensor1,
+            sensorsObject.centerSensor2,
+            sensorsObject.rightSensor1,
+            sensorsObject.rightSensor2,
+            sensorsObject.leftSensor1,
+            sensorsObject.leftSensor2,
+            speed
+        ]
+    }, 50);
 
     var boundaries = [];
     [].forEach.call(boundariesElements, function(el) {
@@ -212,10 +202,12 @@ $(document).ready(function() {
         //     if so, computes the nearest intersection point relative to the machine's center
         //     and retrieves the distance between machine's center and intersection point
 
+        var sensorIntersectionValue = 0;
+
         if (svg.checkIntersection(sensorEl, el)) {
             // gets sensor coordinates relative to the machine
             var sensorPoint2 = [sensorEl.getAttribute("x2"), sensorEl.getAttribute("y2")];
-            var sensorAngle = Math.atan(sensorPoint2[1] / sensorPoint2[0]);
+            var sensorAngle = Math.atan(sensorPoint2[1] / sensorPoint2[0]) * 180 / Math.PI;
             var sensorLength = Math.sqrt(Math.pow(sensorPoint2[0], 2) + Math.pow(sensorPoint2[1], 2));
 
             // gets sensor coordinates relative to the viewport
@@ -235,13 +227,11 @@ $(document).ready(function() {
             for (var i=posX; i<=sensorPoint2VPX; i+=0.1) {
                 var j = sensorEquationA * i + sensorEquationB;
                 if (i <= rangeX[1] && i >= rangeX[0] && j <= rangeY[1] && j >= rangeY[0]) {
-                    console.log(sensorEl.getAttribute("id"));
-                    console.log("sensor contact");
-                    throw new Error("");
+                    sensorIntersectionValue = 1 - (i - posX) / Math.abs((sensorPoint2VPX - posX));
                 }
             };
         }
-        return 0;
+        return sensorIntersectionValue;
     }
 
     function detectSensors() {
@@ -250,7 +240,7 @@ $(document).ready(function() {
             boundaries.forEach(function(el) {
                 sensorIntersectionValues.push(getSensorIntersectionValue(sensorEl, el));
             });
-            sensorsObject[$(sensorEl).attr("id")] = Math.max(...sensorIntersectionValues);
+            sensorsObject[sensorEl.getAttribute("id")] = Math.max.apply(null, sensorIntersectionValues);
         });
     }
 
