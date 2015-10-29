@@ -3,6 +3,8 @@ $(document).ready(function() {
     mode = "manual";
 
     $("button[name=auto]").on("click", function() {
+        window.NN.randomize();
+        window.generations = [[]];
         mode = "auto";
     });
 
@@ -27,11 +29,10 @@ $(document).ready(function() {
     var brakeX = 0;
     var speed = 0;
     var thrust = 0;
-    var brake = false;
+    var brake = 0;
     var resistance = 0;
     var heading = 0;
-    var turnLeft = false;
-    var turnRight = false;
+    var turn = 0;
 
     var rightKey = 39;
     var leftKey = 37;
@@ -49,24 +50,63 @@ $(document).ready(function() {
         sensorsObject[el.getAttribute("id")] = 0;
     });
 
+    function makeGeneration(parentsWeights) {
+        window.NN.setParents(parentsWeights);
+        window.generations.push([]);
+    }
+
+    function feedGeneration(score, weights) {
+        var lastGen = window.generations.length - 1;
+        window.generations[lastGen].push({
+            score: score,
+            weights: weights
+        });
+    }
+
+    function closeGeneration(generation) {
+        // sort generation by descending scores
+        generation.sort(function(a, b) {
+            return b.score - a.score;
+        });
+        var best = generation.slice(0, 2);
+        var parentsWeights = [];
+        for (i in best) {
+            parentsWeights.push(best[i].weights);
+        }
+        makeGeneration(parentsWeights);
+        console.log(best);
+    }
+
     window.setInterval(function() {
+        if (mode == "auto") {
+            // summarizes all data to be sent to NN
+            // and sends it - then wait for the response
+            var neuralNetworkInput = {
+                i1: sensorsObject.centerSensor1,
+                i2: sensorsObject.centerSensor2,
+                i3: sensorsObject.rightSensor1,
+                i4: sensorsObject.rightSensor2,
+                i5: sensorsObject.leftSensor1,
+                i6: sensorsObject.leftSensor2,
+                i7: 1 + speed,
+                i8: 1 + brake,
+                i9: turn
+            }
+
+            // send to neural network
+            neuralNetworkOutput = window.NN.io(neuralNetworkInput);
+            thrust = Math.min(neuralNetworkOutput.o1 / 10, 1);
+            brake = Math.min(neuralNetworkOutput.o2 / 10, 1);
+            turn = 2 * (neuralNetworkOutput.o3 / 10) - 1;
+            if (turn > 1) {
+                turn = 1;
+            } else if (turn < -1) {
+                turn = -1;
+            }
+
+        }
         updateDashboard();
-
-        // summarizes all data to be sent to NN
-        // and sends it - then wait for the response
-        var neuralNetworkInput = [
-            sensorsObject.centerSensor1,
-            sensorsObject.centerSensor2,
-            sensorsObject.rightSensor1,
-            sensorsObject.rightSensor2,
-            sensorsObject.leftSensor1,
-            sensorsObject.leftSensor2,
-            speed
-        ]
-
-        // todo: send to neural network
-
-    }, 50);
+    }, 100);
 
     var boundaries = [];
     [].forEach.call(boundariesElements, function(el) {
@@ -79,8 +119,22 @@ $(document).ready(function() {
     });
 
     function resetMachine() {
+        if (mode == "auto") {
+            var currentGeneration = window.generations[window.generations.length - 1];
+            if (currentGeneration.length < 5) {
+                if (!isNaN(score)) {
+                    feedGeneration(score, window.NN.getWeights());
+                }
+                window.NN.randomize();
+            } else {
+                closeGeneration(currentGeneration);
+                window.NN.randomize();
+            }
+        }
+
         // resets machine's speed and heading
         speed = 0;
+        score = 0;
         heading = 0;
         distance = 0;
         time = 0;
@@ -103,11 +157,11 @@ $(document).ready(function() {
             if (key == upKey) {
                 thrust = 1;
             } else if (key == downKey) {
-                brake = true;
+                brake = 1;
             } else if (key == leftKey) {
-                turnLeft = true;
+                turn = -1;
             } else if (key == rightKey) {
-                turnRight = true;
+                turn = 1;
             }
         }
     }
@@ -118,11 +172,11 @@ $(document).ready(function() {
             if (key == upKey) {
                 thrust = 0;
             } else if (key == downKey) {
-                brake = false;
+                brake = 0;
             } else if (key == leftKey) {
-                turnLeft = false;
+                turn = 0;
             } else if (key == rightKey) {
-                turnRight = false;
+                turn = 0;
             }
         }
     }
@@ -131,19 +185,10 @@ $(document).ready(function() {
         // calculate elapsed time
         // indepedently from display frame rate
         time += 1;
-    }, 50);
-
-    window.setInterval(function() {
-        if (mode == "auto") {
-            thrust = Math.random();
-            if (thrust < 0.3) { brake = Math.random()<.2; }
-            else { brake = false; }
-            turnLeft = Math.random()<.5;
-            turn = Math.random()<.5;
-            if (!turn) { turnLeft = false; turnRight = false; }
-            else if (turn && !turnLeft) { turnRight = true; }
+        if (time > 200) {
+            timeOut(time, distance);
         }
-    }, 200);
+    }, 50);
 
     function move(machine, tranX, tranY, direction) {
         posX += tranX;
@@ -187,10 +232,18 @@ $(document).ready(function() {
         $("#center2").html(Math.round(sensorsObject["centerSensor2"] * 100) / 100);
         $("#right1").html(Math.round(sensorsObject["rightSensor1"] * 100) / 100);
         $("#right2").html(Math.round(sensorsObject["rightSensor2"] * 100) / 100);
+        if (mode == "auto") {
+            $("#generation_number").html(window.generations.length);
+            $("#sample_number").html(window.generations[window.generations.length-1].length+1);
+        }
+    }
+
+    function timeOut(time, distance) {
+        score += distance / time;
+        resetMachine();
     }
 
     function collisionHappened(time, distance) {
-        score -= 10;
         score += distance / time; // bonus for avg speed
         resetMachine();
     }
@@ -272,7 +325,7 @@ $(document).ready(function() {
         if (!detectCollision()) {
             if (brake) {
                 if (speed > 0) {
-                    brakeX = 1;
+                    brakeX = brake;
                 } else {
                     speed = 0;
                     brakeX = 0;
@@ -281,11 +334,8 @@ $(document).ready(function() {
                 brakeX = 0;
             }
 
-            if (turnLeft && speed > 0) {
-                heading -= 0.5 * Math.pow(speed, 0.6);
-            }
-            if (turnRight && speed > 0) {
-                heading += 0.5 * Math.pow(speed, 0.6);
+            if (speed > 0) {
+                heading += 0.5 * turn * Math.pow(speed, 0.6);
             }
 
             speed += thrust / 10;
