@@ -70,6 +70,7 @@ $(document).ready(function() {
         });
         var best = generation.slice(0, 2);
         var parentsWeights = [];
+        // todo: why both fucking parents have the same weights???????
         for (i in best) {
             parentsWeights.push(best[i].weights);
         }
